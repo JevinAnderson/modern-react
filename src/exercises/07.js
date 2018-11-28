@@ -1,6 +1,4 @@
-// Stopwatch: useReducer (a la redux)
-// 🐨 1. swap useState with useReducer
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useReducer} from 'react'
 
 const buttonStyles = {
   border: '1px solid #ccc',
@@ -11,31 +9,36 @@ const buttonStyles = {
   width: 200,
 }
 
-// 🐨 2. create a function called reducer
-// 💰 function reducer(state, action) {}
-// The contents of this function can be whatever you would like.
-// but here's an example of one of the state transitions that would work well:
-// function reducer(state, action) {
-//   switch (action.type) {
-//     // handle more cases here...
-//     case 'CLEAR':
-//       return {
-//         ...state,
-//         running: false,
-//         lapse: 0,
-//       }
-//     default:
-//       break;
-//   }
-// }
+const initialState = {
+  running: false,
+  lapse: 0,
+}
+
+function reducer(state = initialState, action) {
+  switch (action.type) {
+    case 'SET_STATE':
+      return {
+        ...state,
+        ...action.payload,
+      }
+    case 'CLEAR':
+      return {
+        ...state,
+        running: false,
+        lapse: 0,
+      }
+    default:
+      return state
+  }
+}
+
+const setState = payload => ({type: 'SET_STATE', payload})
+const clearState = () => ({type: 'CLEAR'})
 
 function Stopwatch() {
-  // 🐨 3. swap these `useState` calls with a single `useReducer` call
-  // 💰 `const [state, dispatch] = useReducer(reducer, initialStateObject)
-  // https://reactjs.org/docs/hooks-reference.html#usereducer
-  const [lapse, setLapse] = useState(0)
-  const [running, setRunning] = useState(false)
   const timerRef = useRef(null)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const {lapse, running} = state
 
   useEffect(() => () => clearInterval(timerRef.current), [])
 
@@ -45,19 +48,15 @@ function Stopwatch() {
     } else {
       const startTime = Date.now() - lapse
       timerRef.current = setInterval(() => {
-        // 🐨 4. swap this with a call to dispatch
-        setLapse(Date.now() - startTime)
+        dispatch(setState({lapse: Date.now() - startTime}))
       }, 0)
     }
-    // 🐨 5. swap this with a call to dispatch
-    setRunning(!running)
+    dispatch(setState({running: !running}))
   }
 
   function handleClearClick() {
     clearInterval(timerRef.current)
-    // 🐨 6. swap this with a call to dispatch
-    setLapse(0)
-    setRunning(false)
+    dispatch(clearState())
   }
 
   return (
