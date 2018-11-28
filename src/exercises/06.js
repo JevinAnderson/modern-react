@@ -1,5 +1,4 @@
-// Stopwatch: useEffect cleanup
-import React from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 
 const buttonStyles = {
   border: '1px solid #ccc',
@@ -10,36 +9,37 @@ const buttonStyles = {
   width: 200,
 }
 
-function Stopwatch() {
-  // 🐨 1. make lapse and running come from a call to `useState`
-  const lapse = 0
-  const running = false
-  // 🐨 2. create a timerRef to keep track of the intervalId you get back from setInterval
+function useStopwatch(il = 0, ir = false) {
+  const [lapse, setLapse] = useState(il)
+  const [running, setRunning] = useState(ir)
 
-  // If the stopwatch is unmounted when the interval is running
-  // then we could have a memory leak problem. Let's clean that up.
-  // 🐨 7. add a `useEffect` here which does nothing, but returns a cleanup
-  // function which will run on unmount. It should call `clearInterval`
-  // with the timerRef.current (the intervalId you get back from setInterval).
+  return {lapse, setLapse, running, setRunning}
+}
+
+function Stopwatch() {
+  const {lapse, setLapse, running, setRunning} = useStopwatch()
+  const timerRef = useRef()
+
+  useEffect(() => () => clearInterval(timerRef.current), [])
 
   function handleRunClick() {
     if (running) {
-      // 🐨 8. call clearInterval with the intervalId you get back from setInterval
+      clearInterval(timerRef.current)
     } else {
-      // 🐨 3. create a startTime variable that should be Date.now() - lapse
-      // 🐨 4. call setInterval (this will return an intervalId which you should
-      // assign to timerRef.current).
-      // 🐨 5. In your interval callback, update the
-      // lapse state to Date.now() - startTime
+      const startTime = Date.now() - lapse
+      timerRef.current = setInterval(() => {
+        const newLapse = Date.now() - startTime
+        setLapse(newLapse)
+      }, 1)
     }
-    // 🐨 6. toggle the running state
-    // 💰 setRunning(!running)
+
+    setRunning(!running)
   }
 
   function handleClearClick() {
-    // 🐨 9. clear the interval with the intervalId you get back from setInterval
-    // 🐨 10. set lapse to 0
-    // 🐨 11. set running to false
+    clearInterval(timerRef.current)
+    setLapse(0)
+    setRunning(false)
   }
 
   return (
@@ -62,9 +62,6 @@ function Stopwatch() {
     </div>
   )
 }
-
-// Don't make changes to the Usage component. It's here to show you how your
-// component is intended to be used and is used in the tests.
 
 function Usage() {
   return <Stopwatch />
