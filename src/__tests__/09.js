@@ -1,8 +1,8 @@
 import React from 'react'
 import chalk from 'chalk'
 import {render, fireEvent} from 'react-testing-library'
-import Usage from '../exercises-final/09'
-// import Usage from '../exercises/09'
+// import Usage from '../exercises-final/09'
+import Usage from '../exercises/09'
 
 const sleep = time => new Promise(resolve => setTimeout(resolve, time))
 

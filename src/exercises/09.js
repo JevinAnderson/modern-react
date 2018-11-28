@@ -10,23 +10,20 @@ const buttonStyles = {
   width: 200,
 }
 
-function reducer(currentState, newState) {
-  return {...currentState, ...newState}
-}
+const reducer = (currentState, newState) => ({...currentState, ...newState})
 
-function Stopwatch() {
-  // 🐨 1. put all the logic for the stopwatch (including event handlers)
-  // in a custom hook called useStopwatch
-  // return the state, and event handlers in an object
-  const [{running, lapse}, setState] = useReducer(reducer, {
+function useStopwatch(
+  initialState = {
     running: false,
     lapse: 0,
-  })
-  const timerRef = useRef(null)
+  },
+) {
+  const [{running, lapse}, setState] = useReducer(reducer, initialState)
 
+  const timerRef = useRef()
   useEffect(() => () => clearInterval(timerRef.current), [])
 
-  function handleRunClick() {
+  function onRunClick() {
     if (running) {
       clearInterval(timerRef.current)
     } else {
@@ -38,26 +35,26 @@ function Stopwatch() {
     setState({running: !running})
   }
 
-  function handleClearClick() {
+  function onClearClick() {
     clearInterval(timerRef.current)
     setState({running: false, lapse: 0})
   }
 
-  // 🐨 2. call your useStopwatch custom hook and get the state and event handlers
-  // for two individual stopwatches.
+  return {running, lapse, onRunClick, onClearClick}
+}
 
-  // 🐨 3. update the returned JSX to render two stopwatches and the diff between them
-  // 💰 if you want the tests to pass, make sure to pass a `data-testid="diff"` prop
-  // to the span where you render the difference.
+function Stopwatch() {
+  const first = useStopwatch()
+  const second = useStopwatch()
 
   return (
     <div style={{textAlign: 'center'}}>
-      <StopwatchView
-        lapse={lapse}
-        running={running}
-        onRunClick={handleRunClick}
-        onClearClick={handleClearClick}
-      />
+      <StopwatchView {...first} />
+      <hr />
+      <strong>Lapse Difference: </strong>
+      <span data-testid="diff">{first.lapse - second.lapse}ms</span>
+      <hr />
+      <StopwatchView {...second} />
     </div>
   )
 }
