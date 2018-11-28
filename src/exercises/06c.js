@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 
 const buttonStyles = {
   border: '1px solid #ccc',
@@ -9,55 +9,57 @@ const buttonStyles = {
   width: 200,
 }
 
-const asAStopWatch = () => WrappedElement => class {
-  state = {
-    running: this.props.running || false,
-    lapse: this.props.lapse || 0,
+const asAStopWatch = () => WrappedElement =>
+  class extends React.Component {
+    state = {
+      running: this.props.running || false,
+      lapse: this.props.lapse || 0,
+    }
+
+    setRunning = running => {
+      this.setState({running})
+    }
+
+    setLapse = lapse => {
+      this.setState({lapse})
+    }
+
+    render = () => (
+      <WrappedElement
+        {...this.props}
+        {...this.state}
+        setRunning={this.setRunning}
+        setLapse={this.setLapse}
+      />
+    )
   }
 
-  setRunning = running => {
-    this.setState({running})
-  }
+function Stopwatch({lapse, setLapse, running, setRunning}) {
+  const timerRef = useRef()
 
-  setLapse = lapse => {
-    this.setState({lapse})
-  }
+  useEffect(() => () => clearInterval(timerRef.current), [])
 
-  render = () => (
-    <WrappedElement
-      {...this.props}
-      {...this.state}
-      setRunning={this.setRunning}
-      setLapse={this.setLapse}
-    />
-  )
-}
-
-export class Stopwatch extends Component {
-  componentWillUnmount() {
-    this.handleClearClick()
-  }
-
-  handleRunClick = () => {
-    if (this.state.running) {
-      clearInterval(this.interval)
+  function handleRunClick() {
+    if (running) {
+      clearInterval(timerRef.current)
     } else {
-      const startTime = Date.now() - this.state.lapse
-      this.interval = setInterval(() => {
-        this.props.setLapse(Date.now() - startTime)
+      const startTime = Date.now() - lapse
+      timerRef.current = setInterval(() => {
+        const newLapse = Date.now() - startTime
+        setLapse(newLapse)
       }, 1)
     }
 
-    this.props.setRunning(!this.props.running)
+    setRunning(!running)
   }
 
-  handleClearClick = () => {
-    clearInterval(this.interval)
-    this.props.setLapse(0)
-    this.props.setRunning(false)
+  function handleClearClick() {
+    clearInterval(timerRef.current)
+    setLapse(0)
+    setRunning(false)
   }
 
-  render = () => (
+  return (
     <div style={{textAlign: 'center'}}>
       <label
         style={{
@@ -65,23 +67,23 @@ export class Stopwatch extends Component {
           display: 'block',
         }}
       >
-        {this.props.lapse}
+        {lapse}
         ms
       </label>
-      <button onClick={this.handleRunClick} style={buttonStyles}>
-        {this.props.running ? 'Stop' : 'Start'}
+      <button onClick={handleRunClick} style={buttonStyles}>
+        {running ? 'Stop' : 'Start'}
       </button>
-      <button onClick={this.handleClearClick} style={buttonStyles}>
+      <button onClick={handleClearClick} style={buttonStyles}>
         Clear
       </button>
     </div>
   )
 }
 
-const StopWatchWithWrapper = asAStopWatch(Stopwatch)
+const AAS = asAStopWatch()(Stopwatch)
 
-function Usage() {
-  return <StopWatchWithWrapper />
+function Usage(props) {
+  return <AAS {...props} />
 }
 Usage.title = 'Stopwatch: useEffect cleanup'
 
