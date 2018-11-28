@@ -1,17 +1,34 @@
-// React.memo
-import React, {useState} from 'react'
+import React, {useState, memo} from 'react'
 
-// 🐨 1. wrap this in a call to React.memo
-// 💰 const MyComponent = React.memo(function MyComponent() {})
-function Upper({children}) {
-  const [count, setCount] = useState(0)
-  return (
-    <div>
-      Uppercase version: {children.toUpperCase()}{' '}
-      <button onClick={() => setCount(count + 1)}>{count}</button>
-    </div>
-  )
-}
+const Upper = memo(
+  function Upper({children}) {
+    console.log('render: ', children)
+    const [count, setCount] = useState(0)
+    return (
+      <div>
+        Uppercase version: {children.toUpperCase()}{' '}
+        <button onClick={() => setCount(count + 1)}>{count}</button>
+      </div>
+    )
+  },
+  (prev, next) => next.children === prev.children,
+)
+
+// class Upper extends React.PureComponent {
+//   state = {
+//     count: 0,
+//   }
+
+//   increment = () => {
+//     this.setState({count: this.state.count + 1})
+//   }
+//   render = () => console.log(this.props.children) || (
+//     <div>
+//       Uppercase version: {this.props.children.toUpperCase()}{' '}
+//       <button onClick={this.increment}>{this.state.count}</button>
+//     </div>
+//   )
+// }
 
 function App() {
   const [first, setFirstName] = useState('')
@@ -23,11 +40,17 @@ function App() {
         id="first-name-input"
         onChange={e => setFirstName(e.target.value)}
       />
-      <Upper>{first}</Upper>
+      {/* Derived example, but this is a pretty common issue when you're doing prop spreading */}
+      {/* IE, <Upper {...state} />, <Upper {...props} />, etc... */}
+      <Upper first={first} last={last}>
+        {first}
+      </Upper>
       <hr />
       <label htmlFor="last-name-input">Last Name</label>
       <input id="last-name-input" onChange={e => setLastName(e.target.value)} />
-      <Upper>{last}</Upper>
+      <Upper first={first} last={last}>
+        {last}
+      </Upper>
     </div>
   )
 }
