@@ -1,7 +1,7 @@
 import React from 'react'
 import {render, fireEvent} from 'react-testing-library'
-import Usage from '../exercises-final/01'
-// import Usage from '../exercises/01'
+// import Usage from '../exercises-final/01'
+import Usage from '../exercises/01'
 
 test('Usage works', () => {
   const {container} = render(<Usage />)

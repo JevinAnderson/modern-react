@@ -5,11 +5,16 @@ import React, {useState} from 'react'
 // the "use" prefix is a convention, and not required.
 // don't overthink this. It's JavaScript :)
 // 💰 make sure to export it for the tests.
+export function useCounter(initial) {
+  const [count, setCount] = useState(initial)
+  const incrementCount = () => setCount(count + 1)
+
+  return {count, setCount, incrementCount}
+}
 
 function Counter() {
-  // 🐨 move these two lines to your function and return what you need
-  const [count, setCount] = useState(0)
-  const incrementCount = () => setCount(count + 1)
+  const {count, incrementCount} = useCounter(0)
+
   return <button onClick={incrementCount}>{count}</button>
 }
 
