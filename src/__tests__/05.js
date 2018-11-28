@@ -25,7 +25,7 @@ test('calls VanillaTilt.init with the root node', () => {
 // 3. Change submitted from `false` to `true`
 // 4. And you're all done!
 /*
-http://ws.kcd.im/?ws=learn%20react&e=05&em=
+http://ws.kcd.im/?ws=learn%20react&e=05&em=jevanderson@paypal.com
 */
 test.skip('I submitted my elaboration and feedback', () => {
   const submitted = false // change this when you've submitted!
